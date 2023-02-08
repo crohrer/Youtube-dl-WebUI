@@ -16,7 +16,7 @@ class Session
 		$session_expire = min(2147483647 - time() - 1, max($this->config["session_lifetime"], 86400));
 		$session_name = "ydlw_sid";
 
-		if ((!empty($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] != 'off')) || $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
+		if ((!empty($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] != 'off')) || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? "") == 'https') {
 			ini_set("session.cookie_secure", true);
 		}
 
@@ -24,7 +24,7 @@ class Session
 		ini_set("session.name", $session_name);
 		ini_set("session.use_only_cookies", true);
 		ini_set("session.gc_maxlifetime", $session_expire);
-		ini_set("session.cookie_lifetime", min(0, $this->config["log"]["session_lifetime"]));
+		ini_set("session.cookie_lifetime", min(0, $this->config["log"]["session_lifetime"] ?? 0));
 		session_start();
 
 		if($this->config["security"])
