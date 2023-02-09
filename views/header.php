@@ -7,8 +7,8 @@
 		<link rel="stylesheet" href="./css/custom.css">
 		<link rel="Shortcut Icon" href="./favicon_144.png" type="image/x-icon">
 	</head>
-	<body>
-		<nav class="navbar navbar-expand-lg navbar-light bg-light px-2">
+	<body data-bs-theme="dark">
+		<nav class="navbar navbar-expand-lg navbar-light bg-primary px-2">
 			<div class="container-fluid">
 				<a class="navbar-brand" href="./">Youtube-dl WebUI</a>
 				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">

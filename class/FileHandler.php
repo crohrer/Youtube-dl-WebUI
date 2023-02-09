@@ -4,6 +4,7 @@ class FileHandler
 {
 	private $config = [];
 	private $re_partial = '/(?:\.part(?:-Frag\d+)?|\.ytdl)$/m';
+	private $info_json_extension = '/\.info\.json$/m';
 
 	public function __construct()
 	{
@@ -14,7 +15,7 @@ class FileHandler
 	{
 		$files = [];
 
-		if(!$this->outuput_folder_exists())
+		if(!$this->output_folder_exists())
 			return;
 
 		$folder = $this->get_downloads_folder().'/';
@@ -24,11 +25,21 @@ class FileHandler
 			$content = [];
 			$content["name"] = str_replace($folder, "", $file);
 			$content["size"] = $this->to_human_filesize(filesize($file));
-			
-			if (preg_match($this->re_partial, $content["name"]) === 0) {
+            $content["meta"] = [];
+
+            $file_path_info = pathinfo($file);
+            $infoFile = $file_path_info['filename'] . '.info.json';
+
+            if(file_exists($folder.$infoFile)) {
+                $meta_json = file_get_contents($folder.$infoFile);
+                $meta = json_decode($meta_json, false);
+                $content["meta"] = $meta;
+            }
+
+			if (preg_match($this->re_partial, $content["name"]) === 0 && preg_match($this->info_json_extension, $content["name"]) === 0) {
 				$files[] = $content;
 			}
-			
+
 		}
 
 		return $files;
@@ -38,7 +49,7 @@ class FileHandler
 	{
 		$files = [];
 
-		if(!$this->outuput_folder_exists())
+		if(!$this->output_folder_exists())
 			return;
 
 		$folder = $this->get_downloads_folder().'/';
@@ -48,21 +59,21 @@ class FileHandler
 			$content = [];
 			$content["name"] = str_replace($folder, "", $file);
 			$content["size"] = $this->to_human_filesize(filesize($file));
-			
+
 			if (preg_match($this->re_partial, $content["name"]) !== 0) {
 				$files[] = $content;
 			}
-			
+
 		}
 
 		return $files;
 	}
-	
+
 	public function is_log_enabled()
 	{
 		return !!($this->config["log"]);
 	}
-	
+
 	public function countLogs()
 	{
 		if(!$this->config["log"])
@@ -78,7 +89,7 @@ class FileHandler
 	public function listLogs()
 	{
 		$files = [];
-		
+
 		if(!$this->config["log"])
 			return;
 
@@ -100,7 +111,7 @@ class FileHandler
 			} catch (Exception $e) {
 				$content["lastline"] = '';
 				$content["100"] = False;
-			}	
+			}
 			try {
 				$handle = fopen($file, 'r');
 				fseek($handle, filesize($file) - 1);
@@ -126,6 +137,12 @@ class FileHandler
 		{
 			if(sha1(str_replace($folder, "", $file)) == $id)
 			{
+                $file_path_info = pathinfo($file);
+                $infoFile = $file_path_info['filename'] . '.info.json';
+
+                if(file_exists($folder.$infoFile)) {
+                    unlink($folder.$infoFile);
+                }
 				unlink($file);
 			}
 		}
@@ -144,7 +161,7 @@ class FileHandler
 		}
 	}
 
-	private function outuput_folder_exists()
+	private function output_folder_exists()
 	{
 		if(!is_dir($this->get_downloads_folder()))
 		{
@@ -154,7 +171,7 @@ class FileHandler
 				return false; //No folder and creation failed
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -230,7 +247,7 @@ class FileHandler
 				return false; //No folder and creation failed
 			}
 		}
-		
+
 		return true;
 	}
 }

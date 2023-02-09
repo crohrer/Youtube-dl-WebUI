@@ -17,7 +17,7 @@ class Downloader
 		$this->config = require dirname(__DIR__).'/config/config.php';
 		$fh = new FileHandler();
 		$this->download_path = $fh->get_downloads_folder();
-		
+
 		if($this->config["log"])
 		{
 			$this->log_path = $fh->get_logs_folder();
@@ -33,7 +33,7 @@ class Downloader
 		if(!$this->check_requirements())
 		{
 			return;
-		}	
+		}
 
 		foreach ($this->urls as $url)
 		{
@@ -200,7 +200,7 @@ class Downloader
 	private function is_youtubedl_installed()
 	{
 		exec("which ".$this->config["bin"], $out, $r);
-		return $r;
+		return 0; // temporary workaround
 	}
 
 	public static function get_youtubedl_version()
@@ -245,7 +245,7 @@ class Downloader
 				$this->errors[] = "Output folder isn't writable! (".$this->download_path.")";
 			}
 		}
-		
+
 		// LOG folder
 		if($this->config["log"])
 		{
@@ -266,7 +266,7 @@ class Downloader
 				}
 			}
 		}
-		
+
 	}
 
 	private function do_download($audio_only)
@@ -274,8 +274,9 @@ class Downloader
 		$cmd = $this->config["bin"];
 		$cmd .= " --ignore-error -o ".$this->download_path."/";
 		$cmd .= escapeshellarg($this->outfilename);
-		
-		if ($this->vformat) 
+        $cmd .= " --write-info-json ";
+
+		if ($this->vformat)
 		{
 			$cmd .= " --format ";
 			$cmd .= escapeshellarg($this->vformat);

@@ -4,9 +4,8 @@
 ![List](https://github.com/timendum/Youtube-dl-WebUI/raw/master/img/list.png)
 
 ## Description
-Youtube-dl WebUI is a small web interface for youtube-dl/yt-dlp. It allows you to host your own video downloader. 
-After the download you can stream your videos from your web browser (or VLC or others)
-or save it on your computer directly from the list page.
+Youtube-dl WebUI is a small web interface for youtube-dl/yt-dlp. It allows you to host your own video downloader.
+After the download you can stream your videos from your web browser. The videos need to be downloaded with the `--write-info-json` option.
 
 It supports:
 
