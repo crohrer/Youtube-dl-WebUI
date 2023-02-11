@@ -3,6 +3,7 @@
 	require_once 'class/Downloader.php';
 	require_once 'class/FileHandler.php';
 
+    header("Access-Control-Allow-Origin: *");
 	$session = Session::getInstance();
 	$file = new FileHandler;
 

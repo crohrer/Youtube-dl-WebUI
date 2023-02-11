@@ -4,7 +4,9 @@ class FileHandler
 {
 	private $config = [];
 	private $re_partial = '/(?:\.part(?:-Frag\d+)?|\.ytdl)$/m';
+    private $re_fragment = '/\.f[0-9]*\.(mp4|webm)$/m';
 	private $info_json_extension = '/\.info\.json$/m';
+	private $thumb_extension = '/\.(jpg|webp|png)$/m';
 
 	public function __construct()
 	{
@@ -26,9 +28,11 @@ class FileHandler
 			$content["name"] = str_replace($folder, "", $file);
 			$content["size"] = $this->to_human_filesize(filesize($file));
             $content["meta"] = [];
+            $content["thumb"] = "";
 
             $file_path_info = pathinfo($file);
             $infoFile = $file_path_info['filename'] . '.info.json';
+            $thumbFile = $file_path_info['filename'] . '.jpg';
 
             if(file_exists($folder.$infoFile)) {
                 $meta_json = file_get_contents($folder.$infoFile);
@@ -36,7 +40,11 @@ class FileHandler
                 $content["meta"] = $meta;
             }
 
-			if (preg_match($this->re_partial, $content["name"]) === 0 && preg_match($this->info_json_extension, $content["name"]) === 0) {
+            if(file_exists($folder.$thumbFile)) {
+                $content["thumb"] = $thumbFile;
+            }
+
+			if (preg_match($this->re_partial, $content["name"]) === 0 && preg_match($this->re_fragment, $content["name"]) === 0 && preg_match($this->info_json_extension, $content["name"]) === 0 && preg_match($this->thumb_extension, $content["name"]) === 0) {
 				$files[] = $content;
 			}
 
@@ -139,9 +147,17 @@ class FileHandler
 			{
                 $file_path_info = pathinfo($file);
                 $infoFile = $file_path_info['filename'] . '.info.json';
+                $jpg = $file_path_info['filename'] . '.jpg';
+                $webp = $file_path_info['filename'] . '.webp';
 
                 if(file_exists($folder.$infoFile)) {
                     unlink($folder.$infoFile);
+                }
+                if(file_exists($folder.$jpg)) {
+                    unlink($folder.$jpg);
+                }
+                if(file_exists($folder.$webp)) {
+                    unlink($folder.$webp);
                 }
 				unlink($file);
 			}

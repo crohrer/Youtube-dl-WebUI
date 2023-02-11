@@ -59,7 +59,7 @@
 							<?php
 						}
 					?>
-							<li class="nav-item mx-1 dropdown">
+							<li class="nav-item mx-1 dropdown show">
 								<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 							<?php if(Downloader::background_jobs() > 0) echo "<b>"; ?>Background downloads : <?php echo Downloader::background_jobs()." / ".Downloader::max_background_jobs(); if(Downloader::background_jobs() > 0) echo "</b>"; ?> <span class="caret"></span></a>
 								<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -68,15 +68,15 @@
 								{
 									foreach(Downloader::get_current_background_jobs() as $key)
 									{
-										echo "									<li><span class=\"dropdown-item\" title=\"".htmlspecialchars($key['cmd'])."\">Elapsed time : ".$key['time']."</span></li>";
+										echo "<li><span class=\"dropdown-item\" title=\"".htmlspecialchars($key['cmd'])."\">Elapsed time : ".$key['time']."</span></li>";
 									}
 
-									echo "									<li><hr class=\"dropdown-divider\"></li>";
-									echo "									<li><a class=\"dropdown-item\" href=\"./index.php?kill=all\">Kill all downloads</a></li>";
+									echo "<li><hr class=\"dropdown-divider\"></li>";
+									echo "<li><a class=\"dropdown-item\" href=\"./index.php?kill=all\">Kill all downloads</a></li>";
 								}
 								else
 								{
-									echo "									<li><a class=\"dropdown-item disabled\">No jobs !</a></li>";
+									echo "<li><a class=\"dropdown-item disabled\">No jobs !</a></li>";
 								}
 
 							?>

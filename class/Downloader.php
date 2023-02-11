@@ -110,7 +110,7 @@ class Downloader
 	public static function background_jobs()
 	{
 		$config = require dirname(__DIR__).'/config/config.php';
-		return shell_exec("ps aux | grep -v grep | grep -v \"".$config["bin"]." -U\" | grep \"".$config["bin"]." \" | wc -l");
+		return shell_exec("ps aux | grep -v grep | grep \"".$config["bin"]." \" | wc -l");
 	}
 
 	public static function max_background_jobs()
@@ -122,7 +122,7 @@ class Downloader
 	public static function get_current_background_jobs()
 	{
 		$config = require dirname(__DIR__).'/config/config.php';
-		exec("ps -A -o user,pid,etime,cmd | grep -v grep | grep -v \"".$config["bin"]." -U\" | grep \"".$config["bin"]." \"", $output);
+		exec("ps -A -o user,pid,etime,command | grep -v grep | grep \"'".$config["bin"]." \"", $output);
 
 		$bjs = [];
 
@@ -150,7 +150,7 @@ class Downloader
 	public static function kill_them_all()
 	{
 		$config = require dirname(__DIR__).'/config/config.php';
-		exec("ps -A -o pid,cmd | grep -v grep | grep -v \"".$config["bin"]." -U\" | grep \"".$config["bin"]." \" | awk '{print $1}'", $output);
+		exec("ps -A -o pid,command | grep -v grep | grep -v \"".$config["bin"]." -U\" | grep \"".$config["bin"]." \" | awk '{print $1}'", $output);
 
 		if(count($output) <= 0)
 		{
@@ -168,6 +168,12 @@ class Downloader
 		foreach(glob($folder.'*.part') as $file)
 		{
 			unlink($file);
+            $file_path_info = pathinfo($file);
+            $infoFile = preg_replace('\.f[0-9]*\.[a-z]*$','',$file_path_info['filename']) . '.info.json';
+
+            if(file_exists($folder.$infoFile)) {
+                unlink($folder.$infoFile);
+            }
 		}
 	}
 
@@ -272,9 +278,10 @@ class Downloader
 	private function do_download($audio_only)
 	{
 		$cmd = $this->config["bin"];
+		$cmd .= " -f \"bv*+ba/b\" ";
 		$cmd .= " --ignore-error -o ".$this->download_path."/";
 		$cmd .= escapeshellarg($this->outfilename);
-        $cmd .= " --write-info-json ";
+        $cmd .= " --write-info-json --write-thumbnail --convert-thumbnails jpg ";
 
 		if ($this->vformat)
 		{
