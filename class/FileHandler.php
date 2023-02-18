@@ -26,6 +26,7 @@ class FileHandler
 		{
 			$content = [];
 			$content["name"] = str_replace($folder, "", $file);
+			$content["changed"] = filemtime($file);
 			$content["size"] = $this->to_human_filesize(filesize($file));
             $content["meta"] = [];
             $content["thumb"] = "";
@@ -35,6 +36,7 @@ class FileHandler
             $thumbFile = $file_path_info['filename'] . '.jpg';
 
             if(file_exists($folder.$infoFile)) {
+                $content["changed"] = filemtime($folder.$infoFile); // the changed date of the infoFile reflects the download date better
                 $meta_json = file_get_contents($folder.$infoFile);
                 $meta = json_decode($meta_json, false);
                 $content["meta"] = $meta;
@@ -50,6 +52,22 @@ class FileHandler
 
 		}
 
+        usort($files, function($a, $b) {
+            switch ($_GET["sort"]??""){
+                case "shortest":
+                    return $a["meta"]->duration - $b["meta"]->duration;
+                case "longest":
+                    return $b["meta"]->duration - $a["meta"]->duration;
+                case "a-z":
+                    return strcasecmp($a["meta"]->title, $b["meta"]->title);
+                case "z-a":
+                    return strcasecmp($b["meta"]->title, $a["meta"]->title);
+                case "oldest":
+                    return $a["changed"] - $b["changed"];
+                default:
+                    return $b["changed"] - $a["changed"];
+            }
+        });
 		return $files;
 	}
 

@@ -278,7 +278,6 @@ class Downloader
 	private function do_download($audio_only)
 	{
 		$cmd = $this->config["bin"];
-		$cmd .= " -f \"bv*+ba/b\" ";
 		$cmd .= " --ignore-error -o ".$this->download_path."/";
 		$cmd .= escapeshellarg($this->outfilename);
         $cmd .= " --write-info-json --write-thumbnail --convert-thumbnails jpg ";
