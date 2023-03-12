@@ -70,10 +70,10 @@
                     foreach($files as $f)
                     {
                         echo "<tr>";
-                        echo "<td><img width='150' src='".rawurlencode($file->get_relative_downloads_folder()).'/'.rawurlencode($f["thumb"])."'/></td>";
-                        if ($file->get_relative_downloads_folder())
+                        echo "<td><img width='150' src='".$f["path"].'/'.rawurlencode($f["thumb"])."'/></td>";
+                        if ($f["path"])
                         {
-                            echo "<td><a href=\"".rawurlencode($file->get_relative_downloads_folder()).'/'.rawurlencode($f["name"])."\">".$f["meta"]->title??$f["name"]."</a></td>";
+                            echo "<td><a href=\"".$f["path"].'/'.rawurlencode($f["name"])."\">".$f["meta"]->title??$f["name"]."</a></td>";
                         }
                         else
                         {
@@ -97,18 +97,19 @@
                         foreach($files as $f)
                         {
                             echo '<div class="col-sm-3 mb-3"><div class="card" style="overflow: hidden;">';
-                            echo "<a title=\"".$f["meta"]->description."\" style='position: relative;' href=\"".rawurlencode($file->get_relative_downloads_folder()).'/'.rawurlencode($f["name"])."\">";
-                            echo "<img style='max-width: 100%;' src='".rawurlencode($file->get_relative_downloads_folder()).'/'.rawurlencode($f["thumb"])."'/>";
+                            echo "<a title=\"".$f["meta"]->description."\" style='position: relative;' href=\"".$f["path"].'/'.rawurlencode($f["name"])."\">";
+                            echo "<img style='max-width: 100%;' src='".$f["path"].'/'.rawurlencode($f["thumb"])."'/>";
                             echo "<div style='position: absolute; bottom: 0; right: 0; padding: 1px 3px; color: #fff; opacity: .8;' class='bg-secondary'>".$f["meta"]->duration_string."</div>";
                             echo "<div style='position: absolute; top: 0; right: 0; padding: 1px 3px; color: #fff; opacity: .9; size: .5em;' class='bg-secondary'>".$f["meta"]->height."p</div>";
                             echo "</a>";
                             echo "<div class='card-body'>";
                             echo "<p class='card-text'>";
-                            echo "<a href=\"".rawurlencode($file->get_relative_downloads_folder()).'/'.rawurlencode($f["name"])."\">";
+                            echo "<a href=\"".$f["path"].'/'.rawurlencode($f["name"])."\">";
                             echo $f["meta"]->title;
                             echo "</a>";
                             echo "</p>";
-                            echo "<a class='btn btn-danger btn-sm' href=\"./list.php?delete=".sha1($f["name"])."\" class=\"btn btn-danger btn-sm pull-right\">Delete</a>";
+                            echo "<a href=\"./list.php?move=".sha1($f["name"])."\" class=\"btn btn-".($f["external"]?"secondary":"warning")." btn-sm\">Move to ".($f["external"]?"internal":"external")."</a>";
+                            echo "<a href=\"./list.php?delete=".sha1($f["name"])."\" class=\"btn btn-danger btn-sm\">Delete</a>";
                             echo "</div>";
                             echo "</div></div>";
                         }
@@ -144,7 +145,7 @@
 					echo "<tr>";
 					if ($file->get_relative_downloads_folder())
 					{
-						echo "<td><a href=\"".rawurlencode($file->get_relative_downloads_folder()).'/'.rawurlencode($f["name"])."\" download>".$f["name"]."</a></td>";
+						echo "<td><a href=\"".$f["path"].'/'.rawurlencode($f["name"])."\" download>".$f["name"]."</a></td>";
 					}
 					else
 					{

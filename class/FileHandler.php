@@ -3,15 +3,54 @@
 class FileHandler
 {
 	private $config = [];
-	private $re_partial = '/(?:\.part(?:-Frag\d+)?|\.ytdl)$/m';
-    private $re_fragment = '/\.f[0-9]*\.(mp4|webm)$/m';
-	private $info_json_extension = '/\.info\.json$/m';
-	private $thumb_extension = '/\.(jpg|webp|png)$/m';
+    const RE_PARTIAL = '/(?:\.part(?:-Frag\d+)?|\.ytdl)$/m';
+    const RE_FRAGMENT = '/\.f[0-9]*\.(mp4|webm)$/m';
+    const INFO_JSON_EXTENSION = '/\.info\.json$/m';
+    const THUMB_EXTENSION = '/\.(jpg|webp|png)$/m';
+    const IS_EXTERNAL_VIDEO = true;
+    const IS_INTERNAL_VIDEO = false;
 
 	public function __construct()
 	{
 		$this->config = require dirname(__DIR__).'/config/config.php';
 	}
+
+    public static function appendFiles($filesFolder, $target, $path, $isExternalVideo){
+        if(!is_dir($filesFolder)) {
+            return $target;
+        }
+        foreach(glob($filesFolder.'*.*', GLOB_BRACE) as $file)
+        {
+            $content = [];
+            $content["name"] = str_replace($filesFolder, "", $file);
+            $content["path"] = $path;
+            $content["changed"] = filemtime($file);
+            $content["size"] = FileHandler::to_human_filesize(filesize($file));
+            $content["meta"] = [];
+            $content["thumb"] = "";
+            $content["external"] = $isExternalVideo;
+
+            $file_path_info = pathinfo($file);
+            $infoFile = $file_path_info['filename'] . '.info.json';
+            $thumbFile = $file_path_info['filename'] . '.jpg';
+
+            if(file_exists($filesFolder.$infoFile)) {
+                $content["changed"] = filemtime($filesFolder.$infoFile); // the changed date of the infoFile reflects the download date better
+                $meta_json = file_get_contents($filesFolder.$infoFile);
+                $meta = json_decode($meta_json, false);
+                $content["meta"] = $meta;
+            }
+
+            if(file_exists($filesFolder.$thumbFile)) {
+                $content["thumb"] = $thumbFile;
+            }
+
+            if (preg_match(FileHandler::RE_PARTIAL, $content["name"]) === 0 && preg_match(FileHandler::RE_FRAGMENT, $content["name"]) === 0 && preg_match(FileHandler::INFO_JSON_EXTENSION, $content["name"]) === 0 && preg_match(FileHandler::THUMB_EXTENSION, $content["name"]) === 0) {
+                $target[] = $content;
+            }
+        }
+        return $target;
+    }
 
 	public function listFiles()
 	{
@@ -22,35 +61,8 @@ class FileHandler
 
 		$folder = $this->get_downloads_folder().'/';
 
-		foreach(glob($folder.'*.*', GLOB_BRACE) as $file)
-		{
-			$content = [];
-			$content["name"] = str_replace($folder, "", $file);
-			$content["changed"] = filemtime($file);
-			$content["size"] = $this->to_human_filesize(filesize($file));
-            $content["meta"] = [];
-            $content["thumb"] = "";
-
-            $file_path_info = pathinfo($file);
-            $infoFile = $file_path_info['filename'] . '.info.json';
-            $thumbFile = $file_path_info['filename'] . '.jpg';
-
-            if(file_exists($folder.$infoFile)) {
-                $content["changed"] = filemtime($folder.$infoFile); // the changed date of the infoFile reflects the download date better
-                $meta_json = file_get_contents($folder.$infoFile);
-                $meta = json_decode($meta_json, false);
-                $content["meta"] = $meta;
-            }
-
-            if(file_exists($folder.$thumbFile)) {
-                $content["thumb"] = $thumbFile;
-            }
-
-			if (preg_match($this->re_partial, $content["name"]) === 0 && preg_match($this->re_fragment, $content["name"]) === 0 && preg_match($this->info_json_extension, $content["name"]) === 0 && preg_match($this->thumb_extension, $content["name"]) === 0) {
-				$files[] = $content;
-			}
-
-		}
+        $files = FileHandler::appendFiles($folder, $files, $this->get_relative_downloads_folder(), FileHandler::IS_INTERNAL_VIDEO);
+        $files = FileHandler::appendFiles($this->get_external_downloads_folder().'/', $files, $this->get_relative_downloads_folder()."/ssd", FileHandler::IS_EXTERNAL_VIDEO);
 
         usort($files, function($a, $b) {
             switch ($_GET["sort"]??""){
@@ -86,7 +98,7 @@ class FileHandler
 			$content["name"] = str_replace($folder, "", $file);
 			$content["size"] = $this->to_human_filesize(filesize($file));
 
-			if (preg_match($this->re_partial, $content["name"]) !== 0) {
+			if (preg_match(FileHandler::RE_PARTIAL, $content["name"]) !== 0) {
 				$files[] = $content;
 			}
 
@@ -157,29 +169,35 @@ class FileHandler
 
 	public function delete($id)
 	{
-		$folder = $this->get_downloads_folder().'/';
+		$folders = [
+            $this->get_downloads_folder().'/',
+            $this->get_external_downloads_folder()."/",
+        ];
 
-		foreach(glob($folder.'*.*', GLOB_BRACE) as $file)
-		{
-			if(sha1(str_replace($folder, "", $file)) == $id)
-			{
-                $file_path_info = pathinfo($file);
-                $infoFile = $file_path_info['filename'] . '.info.json';
-                $jpg = $file_path_info['filename'] . '.jpg';
-                $webp = $file_path_info['filename'] . '.webp';
+        foreach($folders as $folder)
+        {
+            foreach(glob($folder.'*.*', GLOB_BRACE) as $file)
+            {
+                if(sha1(str_replace($folder, "", $file)) == $id)
+                {
+                    $file_path_info = pathinfo($file);
+                    $infoFile = $file_path_info['filename'] . '.info.json';
+                    $jpg = $file_path_info['filename'] . '.jpg';
+                    $webp = $file_path_info['filename'] . '.webp';
 
-                if(file_exists($folder.$infoFile)) {
-                    unlink($folder.$infoFile);
+                    if(file_exists($folder.$infoFile)) {
+                        unlink($folder.$infoFile);
+                    }
+                    if(file_exists($folder.$jpg)) {
+                        unlink($folder.$jpg);
+                    }
+                    if(file_exists($folder.$webp)) {
+                        unlink($folder.$webp);
+                    }
+                    unlink($file);
                 }
-                if(file_exists($folder.$jpg)) {
-                    unlink($folder.$jpg);
-                }
-                if(file_exists($folder.$webp)) {
-                    unlink($folder.$webp);
-                }
-				unlink($file);
-			}
-		}
+            }
+        }
 	}
 
 	public function deleteLog($id)
@@ -209,7 +227,7 @@ class FileHandler
 		return true;
 	}
 
-	public function to_human_filesize($bytes, $decimals = 1)
+	public static function to_human_filesize($bytes, $decimals = 1)
 	{
 		$sz = 'BKMGTP';
 		$factor = floor((strlen($bytes) - 1) / 3);
@@ -239,6 +257,16 @@ class FileHandler
 				$path = dirname(__DIR__).'/' . $path;
 		}
 		return $path;
+	}
+
+	public function get_external_downloads_folder()
+	{
+		$path =  $this->config["externalFolder"];
+		if(strpos($path , "/") !== 0)
+		{
+				$path = dirname(__DIR__).'/' . $path;
+		}
+		return $path.'/'.$this->config["outputFolder"];
 	}
 
 	public function get_logs_folder()
