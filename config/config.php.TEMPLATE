@@ -8,6 +8,7 @@ return array(
 	"security" => true,
 	"password" => "63a9f0ea7bb98050796b649e85481845",
 	"outputFolder" => "downloads",
+    "externalFolder" => "/Volumes/my_external_drive/youtube",
 	"extracter" => "ffmpeg",
 	"log" => true,
 	"outfilename" => "%(title)s-%(id)s.%(ext)s",
