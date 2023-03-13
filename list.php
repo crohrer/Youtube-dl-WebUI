@@ -19,6 +19,13 @@
 		exit;
 	}
 
+	if($session->is_logged_in() && isset($_GET["move"]))
+	{
+		$file->move($_GET["move"]);
+		header("Location: list.php");
+		exit;
+	}
+
 	$files = $file->listFiles();
 	$parts = $file->listParts();
 
@@ -45,6 +52,8 @@
                         <option value="shortest" <?php if(($_GET["sort"]??"")=="shortest"):?>selected<?php endif ?>>Shortest</option>
                         <option value="a-z" <?php if(($_GET["sort"]??"")=="a-z"):?>selected<?php endif ?>>A-Z</option>
                         <option value="z-a" <?php if(($_GET["sort"]??"")=="z-a"):?>selected<?php endif ?>>Z-A</option>
+                        <option value="internal" <?php if(($_GET["sort"]??"")=="internal"):?>selected<?php endif ?>>internal first</option>
+                        <option value="external" <?php if(($_GET["sort"]??"")=="external"):?>selected<?php endif ?>>external first</option>
                     </select>
                 </form>
             </div>
@@ -63,6 +72,9 @@
                             <th>Duration</th>
                             <th>Size</th>
                             <th><span class="pull-right">Delete link</span></th>
+                            <?php if($file->external_folder_exists()){?>
+                                <th>Move</th>
+                            <?php } ?>
                         </tr>
                     </thead>
                     <tbody>
@@ -84,6 +96,9 @@
                         echo "<td>".$f["meta"]->duration_string??"n/a"."</td>";
                         echo "<td>".$f["size"]."</td>";
                         echo "<td><a href=\"./list.php?delete=".sha1($f["name"])."\" class=\"btn btn-danger btn-sm pull-right\">Delete</a></td>";
+                        if($file->external_folder_exists()){
+                            echo "<td><a href=\"./list.php?move=".sha1($f["name"])."\" class=\"btn btn-".($f["external"]?"secondary":"warning")." btn-sm\">Move to ".($f["external"]?"internal":"external")."</a></td>";
+                        }
                         echo "</tr>";
                     }
                 ?>
@@ -108,7 +123,9 @@
                             echo $f["meta"]->title;
                             echo "</a>";
                             echo "</p>";
-                            echo "<a href=\"./list.php?move=".sha1($f["name"])."\" class=\"btn btn-".($f["external"]?"secondary":"warning")." btn-sm\">Move to ".($f["external"]?"internal":"external")."</a>";
+                            if($file->external_folder_exists()){
+                                echo "<a href=\"./list.php?move=".sha1($f["name"])."\" class=\"btn btn-".($f["external"]?"secondary":"warning")." btn-sm\">Move to ".($f["external"]?"internal":"external")."</a> ";
+                            }
                             echo "<a href=\"./list.php?delete=".sha1($f["name"])."\" class=\"btn btn-danger btn-sm\">Delete</a>";
                             echo "</div>";
                             echo "</div></div>";

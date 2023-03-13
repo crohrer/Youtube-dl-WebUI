@@ -74,6 +74,10 @@ class FileHandler
                     return strcasecmp($a["meta"]->title, $b["meta"]->title);
                 case "z-a":
                     return strcasecmp($b["meta"]->title, $a["meta"]->title);
+                case "internal":
+                    return (($a["external"] == $b["external"]) ? 0 : $a["external"]) ? 1 : -1;
+                case "external":
+                    return (($a["external"] == $b["external"]) ? 0 : $a["external"]) ? -1 : 1;
                 case "oldest":
                     return $a["changed"] - $b["changed"];
                 default:
@@ -167,6 +171,48 @@ class FileHandler
 		return $files;
 	}
 
+	public function move($id)
+	{
+		$folders = [
+            $this->get_downloads_folder().'/',
+            $this->get_external_downloads_folder()."/",
+        ];
+
+        foreach($folders as $folder)
+        {
+            if(!is_dir($folder)) return;
+        }
+
+        foreach($folders as $folder)
+        {
+            $isFirstFolder = $folders[0]==$folder;
+            $target = $folders[($isFirstFolder?1:0)];
+
+            foreach(glob($folder.'*.*', GLOB_BRACE) as $file)
+            {
+                if(sha1(str_replace($folder, "", $file)) == $id)
+                {
+                    $file_path_info = pathinfo($file);
+                    $infoFile = $file_path_info['filename'] . '.info.json';
+                    $jpg = $file_path_info['filename'] . '.jpg';
+                    $webp = $file_path_info['filename'] . '.webp';
+
+                    if(file_exists($folder.$infoFile)) {
+                        rename($folder.$infoFile, $target.$infoFile);
+                    }
+                    if(file_exists($folder.$jpg)) {
+                        rename($folder.$jpg, $target.$jpg);
+                    }
+                    if(file_exists($folder.$webp)) {
+                        rename($folder.$webp, $target.$webp);
+                    }
+                    rename($file, $target.$file_path_info['basename']);
+                    return; // prevent it from finding the file again and moving it back
+                }
+            }
+        }
+	}
+
 	public function delete($id)
 	{
 		$folders = [
@@ -222,6 +268,16 @@ class FileHandler
 			{
 				return false; //No folder and creation failed
 			}
+		}
+
+		return true;
+	}
+
+	public function external_folder_exists()
+	{
+		if(!is_dir($this->get_external_downloads_folder()))
+		{
+            return false;
 		}
 
 		return true;
