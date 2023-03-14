@@ -26,6 +26,7 @@ class FileHandler
             $content["path"] = $path;
             $content["changed"] = filemtime($file);
             $content["size"] = FileHandler::to_human_filesize(filesize($file));
+            $content["filesize"] = filesize($file);
             $content["meta"] = [];
             $content["thumb"] = "";
             $content["external"] = $isExternalVideo;
@@ -70,6 +71,10 @@ class FileHandler
                     return $a["meta"]->duration - $b["meta"]->duration;
                 case "longest":
                     return $b["meta"]->duration - $a["meta"]->duration;
+                case "biggest":
+                    return $b["filesize"] - $a["filesize"];
+                case "smallest":
+                    return $a["filesize"] - $b["filesize"];
                 case "a-z":
                     return strcasecmp($a["meta"]->title, $b["meta"]->title);
                 case "z-a":

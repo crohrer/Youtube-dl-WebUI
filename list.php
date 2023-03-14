@@ -47,13 +47,20 @@
                 <form action="" style="width: 50%; margin-left:50%;">
                     <select class="form-select" name="sort" id="sort-select" onchange="this.parentElement.submit();">
                         <option value="">Newest</option>
-                        <option value="oldest" <?php if(($_GET["sort"]??"")=="oldest"):?>selected<?php endif ?>>Oldest</option>
-                        <option value="longest" <?php if(($_GET["sort"]??"")=="longest"):?>selected<?php endif ?>>Longest</option>
-                        <option value="shortest" <?php if(($_GET["sort"]??"")=="shortest"):?>selected<?php endif ?>>Shortest</option>
-                        <option value="a-z" <?php if(($_GET["sort"]??"")=="a-z"):?>selected<?php endif ?>>A-Z</option>
-                        <option value="z-a" <?php if(($_GET["sort"]??"")=="z-a"):?>selected<?php endif ?>>Z-A</option>
-                        <option value="internal" <?php if(($_GET["sort"]??"")=="internal"):?>selected<?php endif ?>>internal first</option>
-                        <option value="external" <?php if(($_GET["sort"]??"")=="external"):?>selected<?php endif ?>>external first</option>
+                        <?php
+                        foreach([
+                            ["oldest","Oldest"],
+                            ["longest","Longest"],
+                            ["shortest","Shortest"],
+                            ["biggest","Biggest"],
+                            ["smallest","Smallest"],
+                            ["a-z","A-Z"],
+                            ["z-a","Z-A"],
+                            ["internal","internal first"],
+                            ["external","external first"],
+                        ] as $option) {
+                            echo "<option value='".$option[0]."' ". ((($_GET["sort"]??"")==$option[0])?"selected":"").">".$option[1]."</option>";
+                        }?>
                     </select>
                 </form>
             </div>
