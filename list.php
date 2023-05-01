@@ -94,15 +94,15 @@
                         echo "<td><img class='".($hideImages?'hiddenImg':'')."' width='150' src='".$f["path"].'/'.rawurlencode($f["thumb"])."'/></td>";
                         if ($f["path"])
                         {
-                            echo "<td><a href=\"".$f["path"].'/'.rawurlencode($f["name"])."\">".$f["meta"]->title??$f["name"]."</a></td>";
+                            echo "<td><a href=\"".$f["path"].'/'.rawurlencode($f["name"])."\">".$f["title"]??$f["name"]."</a></td>";
                         }
                         else
                         {
                             echo "<td>".$f["name"]."</td>";
                         }
-                        echo "<td>".$f["meta"]->description??"n/a"."</td>";
-                        echo "<td>".$f["meta"]->height??"n/a"."</td>";
-                        echo "<td>".$f["meta"]->duration_string??"n/a"."</td>";
+                        echo "<td>".$f["description"]??"n/a"."</td>";
+                        echo "<td>".$f["height"]??"n/a"."</td>";
+                        echo "<td>".$f["duration_string"]??"n/a"."</td>";
                         echo "<td>".$f["size"]."</td>";
                         echo "<td><a href=\"./list.php?delete=".sha1($f["name"])."\" class=\"btn btn-danger btn-sm pull-right\">Delete</a></td>";
                         if($file->external_folder_exists()){
@@ -121,15 +121,15 @@
                         foreach($files as $f)
                         {
                             echo '<div class="col-sm-3 mb-3"><div class="card" style="overflow: hidden;">';
-                            echo "<a title=\"".$f["meta"]->description."\" style='position: relative;' href=\"".$f["path"].'/'.rawurlencode($f["name"])."\">";
+                            echo "<a title=\"".$f["description"]."\" style='position: relative;' href=\"".$f["path"].'/'.rawurlencode($f["name"])."\">";
                             echo "<img class='".($hideImages?'hiddenImg':'')."' style='max-width: 100%;' src='".$f["path"].'/'.rawurlencode($f["thumb"])."'/>";
-                            echo "<div style='position: absolute; bottom: 0; left: 0; padding: 1px 3px; color: #fff; opacity: .8;' class='bg-secondary'>".$f["meta"]->duration_string."</div>";
-                            echo "<div style='position: absolute; top: 0; left: 0; padding: 1px 3px; color: #fff; opacity: .9; size: .5em;' class='bg-secondary'>".$f["meta"]->height."p</div>";
+                            echo "<div style='position: absolute; bottom: 0; left: 0; padding: 1px 3px; color: #fff; opacity: .8;' class='bg-secondary'>".$f["duration_string"]."</div>";
+                            echo "<div style='position: absolute; top: 0; left: 0; padding: 1px 3px; color: #fff; opacity: .9; size: .5em;' class='bg-secondary'>".$f["height"]."p</div>";
                             echo "</a>";
                             echo "<div class='card-body'>";
                             echo "<p class='card-text'>";
                             echo "<a href=\"".$f["path"].'/'.rawurlencode($f["name"])."\">";
-                            echo $f["meta"]->title;
+                            echo $f["title"];
                             echo "</a>";
                             echo "</p>";
                             if($file->external_folder_exists()){

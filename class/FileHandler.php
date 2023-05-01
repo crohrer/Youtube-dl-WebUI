@@ -21,13 +21,14 @@ class FileHandler
         }
         foreach(glob($filesFolder.'*.*', GLOB_BRACE) as $file)
         {
+            $filename = str_replace($filesFolder, "", $file);
+            $cacheKey = $filesFolder.'/'.$filename;
             $content = [];
-            $content["name"] = str_replace($filesFolder, "", $file);
+            $content["name"] = $filename;
             $content["path"] = $path;
             $content["changed"] = filemtime($file);
             $content["size"] = FileHandler::to_human_filesize(filesize($file));
             $content["filesize"] = filesize($file);
-            $content["meta"] = [];
             $content["thumb"] = "";
             $content["external"] = $isExternalVideo;
 
@@ -35,12 +36,22 @@ class FileHandler
             $infoFile = $file_path_info['filename'] . '.info.json';
             $thumbFile = $file_path_info['filename'] . '.jpg';
 
-            if(file_exists($filesFolder.$infoFile)) {
+            $cachedValue = apcu_fetch($cacheKey);
+            if($cachedValue){
+                $content = $cachedValue;
+            } else if(file_exists($filesFolder.$infoFile))
+            {
                 $content["changed"] = filemtime($filesFolder.$infoFile); // the changed date of the infoFile reflects the download date better
                 $meta_json = file_get_contents($filesFolder.$infoFile);
                 $meta = json_decode($meta_json, false);
-                $content["meta"] = $meta;
+                $content["title"] = $meta->title;
+                $content["description"] = $meta->description;
+                $content["height"] = $meta->height;
+                $content["duration_string"] = $meta->duration_string;
+                $content["duration"] = $meta->duration;
             }
+
+            apcu_store($cacheKey, $content, 3600);
 
             if(file_exists($filesFolder.$thumbFile)) {
                 $content["thumb"] = $thumbFile;
@@ -72,17 +83,17 @@ class FileHandler
         usort($files, function($a, $b) {
             switch ($_GET["sort"]??""){
                 case "shortest":
-                    return $a["meta"]->duration - $b["meta"]->duration;
+                    return $a["duration"] - $b["duration"];
                 case "longest":
-                    return $b["meta"]->duration - $a["meta"]->duration;
+                    return $b["duration"] - $a["duration"];
                 case "biggest":
                     return $b["filesize"] - $a["filesize"];
                 case "smallest":
                     return $a["filesize"] - $b["filesize"];
                 case "a-z":
-                    return strcasecmp($a["meta"]->title, $b["meta"]->title);
+                    return strcasecmp($a["title"], $b["title"]);
                 case "z-a":
-                    return strcasecmp($b["meta"]->title, $a["meta"]->title);
+                    return strcasecmp($b["title"], $a["title"]);
                 case "internal":
                     return (($a["external"] == $b["external"]) ? 0 : $a["external"]) ? 1 : -1;
                 case "external":
