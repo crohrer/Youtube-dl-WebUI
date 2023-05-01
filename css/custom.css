@@ -6,3 +6,13 @@
   height: 40px;
   background-color: #f5f5f5;
 }
+
+.hiddenImg {
+    opacity: 0.05;
+    transition: none;
+}
+
+.hiddenImg:hover {
+    opacity: 0.5;
+    transition: all 4s;
+}

@@ -65,6 +65,10 @@ class FileHandler
         $files = FileHandler::appendFiles($folder, $files, $this->get_relative_downloads_folder(), FileHandler::IS_INTERNAL_VIDEO);
         $files = FileHandler::appendFiles($this->get_external_downloads_folder().'/', $files, $this->get_relative_downloads_folder()."/ssd", FileHandler::IS_EXTERNAL_VIDEO);
 
+        if(($_GET["sort"]??"") == "random"){
+            shuffle($files);
+            return $files;
+        }
         usort($files, function($a, $b) {
             switch ($_GET["sort"]??""){
                 case "shortest":
@@ -119,6 +123,11 @@ class FileHandler
 	public function is_log_enabled()
 	{
 		return !!($this->config["log"]);
+	}
+
+	public function is_image_hiding_enabled()
+	{
+		return !!($this->config["hideImages"]);
 	}
 
 	public function countLogs()

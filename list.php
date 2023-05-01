@@ -5,6 +5,7 @@
 
 	$session = Session::getInstance();
 	$file = new FileHandler;
+    $hideImages = $file->is_image_hiding_enabled();
 
 	if(!$session->is_logged_in())
 	{
@@ -58,6 +59,7 @@
                             ["z-a","Z-A"],
                             ["internal","internal first"],
                             ["external","external first"],
+                            ["random","random"],
                         ] as $option) {
                             echo "<option value='".$option[0]."' ". ((($_GET["sort"]??"")==$option[0])?"selected":"").">".$option[1]."</option>";
                         }?>
@@ -69,7 +71,7 @@
             <div class="tab-pane fade show" id="nav-list" role="tabpanel" aria-labelledby="nav-list-tab" tabindex="0">
                 <br>
                 <h2>List of available files:</h2>
-                <table class="table table-striped table-hover table-dark">
+                <table class="table table-striped table-hover table-dark" style="table-layout:fixed;">
                     <thead>
                         <tr>
                             <th>Thumbnail</th>
@@ -89,7 +91,7 @@
                     foreach($files as $f)
                     {
                         echo "<tr>";
-                        echo "<td><img width='150' src='".$f["path"].'/'.rawurlencode($f["thumb"])."'/></td>";
+                        echo "<td><img class='".($hideImages?'hiddenImg':'')."' width='150' src='".$f["path"].'/'.rawurlencode($f["thumb"])."'/></td>";
                         if ($f["path"])
                         {
                             echo "<td><a href=\"".$f["path"].'/'.rawurlencode($f["name"])."\">".$f["meta"]->title??$f["name"]."</a></td>";
@@ -120,9 +122,9 @@
                         {
                             echo '<div class="col-sm-3 mb-3"><div class="card" style="overflow: hidden;">';
                             echo "<a title=\"".$f["meta"]->description."\" style='position: relative;' href=\"".$f["path"].'/'.rawurlencode($f["name"])."\">";
-                            echo "<img style='max-width: 100%;' src='".$f["path"].'/'.rawurlencode($f["thumb"])."'/>";
-                            echo "<div style='position: absolute; bottom: 0; right: 0; padding: 1px 3px; color: #fff; opacity: .8;' class='bg-secondary'>".$f["meta"]->duration_string."</div>";
-                            echo "<div style='position: absolute; top: 0; right: 0; padding: 1px 3px; color: #fff; opacity: .9; size: .5em;' class='bg-secondary'>".$f["meta"]->height."p</div>";
+                            echo "<img class='".($hideImages?'hiddenImg':'')."' style='max-width: 100%;' src='".$f["path"].'/'.rawurlencode($f["thumb"])."'/>";
+                            echo "<div style='position: absolute; bottom: 0; left: 0; padding: 1px 3px; color: #fff; opacity: .8;' class='bg-secondary'>".$f["meta"]->duration_string."</div>";
+                            echo "<div style='position: absolute; top: 0; left: 0; padding: 1px 3px; color: #fff; opacity: .9; size: .5em;' class='bg-secondary'>".$f["meta"]->height."p</div>";
                             echo "</a>";
                             echo "<div class='card-body'>";
                             echo "<p class='card-text'>";
@@ -154,7 +156,7 @@
 			{
 		?>
 			<h2>List of part files:</h2>
-			<table class="table table-striped table-hover ">
+			<table class="table table-striped table-hover" style="table-layout:fixed;">
 				<thead>
 					<tr>
 						<th>Title</th>
